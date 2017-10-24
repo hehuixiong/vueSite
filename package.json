@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.16.2",
     "element-ui": "^1.4.7",
+    "iview": "^2.5.1",
     "jquery": "^3.2.1",
     "vue": "^2.5.2",
     "vue-quill-editor": "^2.3.3"

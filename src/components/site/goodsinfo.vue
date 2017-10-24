@@ -7,10 +7,8 @@
         <a href="/index.html">首页</a> &gt;
         <a href="/goods.html">购物商城</a>
         <a href="/goods/42/1.html">商品详情</a>
-
       </div>
     </div>
-
     <!-- 商品详情 -->
     <div class="section">
       <div class="wrapper clearfix">
@@ -52,7 +50,7 @@
 
               <!--商品信息-->
               <div class="goods-spec">
-                <h1 v-text="ginfo.goodsinfo.title"></h1>
+                <h1>{{ ginfo.goodsinfo.title }}</h1>
                 <p class="subtitle">送美诗特TA20无线话筒1套+自拍神器杆！ DTS解码数字功放 HDMI、光纤、同轴多组输入输出 USB、蓝牙播放功能</p>
                 <div class="spec-box">
                   <dl>
@@ -78,12 +76,6 @@
                     <dt>购买数量</dt>
                     <dd>
                       <div class="stock-box">
-                        <!-- <input id="commodityChannelId" type="hidden" value="2">
-                        <input id="commodityArticleId" type="hidden" value="98">
-                        <input id="commodityGoodsId" type="hidden" value="0">
-                        <input id="commoditySelectNum" type="text" maxlength="9" value="1" maxvalue="10" onkeydown="return checkNumber(event);">
-                        <a class="add" onclick="addCartNum(1);">+</a>
-                        <a class="remove" onclick="addCartNum(-1);">-</a> -->
                         <el-input-number v-model="num" :min="1" debounce></el-input-number>
                       </div>
                       <span class="stock-txt">
@@ -110,22 +102,23 @@
               <!--选项卡-->
               <div id="tabHead" class="tab-head" style="position: static; top: 517px; width: 925px;">
                 <ul>
-                  <li>
-                    <a class="selected" href="javascript:;">商品介绍</a>
+                  <li @click="toogleContent(true)">
+                    <a v-bind="{class:isContent?'selected':''}" href="javascript:;">商品介绍</a>
                   </li>
-                  <li>
-                    <a href="javascript:;" class="">商品评论</a>
+                  <!-- selected -->
+                  <li @click="toogleContent(false)">
+                    <a v-bind="{class:!isContent?'selected':''}" href="javascript:;" class="">商品评论</a>
                   </li>
                 </ul>
               </div>
               <!--/选项卡-->
 
               <!--选项内容-->
-              <div class="tab-content entry" style="display:block;">
-                内容
+              <div class="tab-content entry" v-if="isContent">
+                <p v-html="ginfo.goodsinfo.content"></p>
               </div>
 
-              <div class="tab-content" style="display: block;">
+              <div class="tab-content" v-if="!isContent">
                 <!--网友评论-->
                 <div class="comment-box">
                   <!--取得评论总数-->
@@ -135,49 +128,35 @@
                     </div>
                     <div class="conn-box">
                       <div class="editor">
-                        <textarea id="txtContent" name="txtContent" sucmsg=" " datatype="*10-1000" nullmsg="请填写评论内容！"></textarea>
+                        <textarea id="txtContent" name="txtContent" v-model="txtContent" datatype="*10-1000" nullmsg="请填写评论内容！"></textarea>
                         <span class="Validform_checktip"></span>
                       </div>
                       <div class="subcon">
-                        <input id="btnSubmit" name="submit" type="submit" value="提交评论" class="submit">
+                        <input type="button" value="提交评论" class="submit" @click="btnComment">
                         <span class="Validform_checktip"></span>
                       </div>
                     </div>
                   </form>
                   <ul id="commentList" class="list-box">
-                    <p style="margin:5px 0 15px 69px;line-height:42px;text-align:center;border:1px solid #f7f7f7;">暂无评论，快来抢沙发吧！</p>
-                    <li>
+                    <p v-if="comment.length<=0" style="margin:5px 0 15px 69px;line-height:42px;text-align:center;border:1px solid #f7f7f7;">暂无评论，快来抢沙发吧！</p>
+                    <li v-for="(comment,index) in comment" :key="index">
                       <div class="avatar-box">
                         <i class="iconfont icon-user-full"></i>
                       </div>
                       <div class="inner-box">
                         <div class="info">
-                          <span>匿名用户</span>
-                          <span>2017/10/23 14:58:59</span>
+                          <span v-text="comment.user_name"></span>
+                          <span>{{ comment.add_time | addTime }}</span>
                         </div>
-                        <p>testtesttest</p>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="avatar-box">
-                        <i class="iconfont icon-user-full"></i>
-                      </div>
-                      <div class="inner-box">
-                        <div class="info">
-                          <span>匿名用户</span>
-                          <span>2017/10/23 14:59:36</span>
-                        </div>
-                        <p>很清晰调动单很清晰调动单</p>
+                        <p v-text="comment.content"></p>
                       </div>
                     </li>
                   </ul>
                   <!--放置页码-->
-                  <div class="page-box" style="margin:5px 0 0 62px">
-                    <div id="pagination" class="digg">
-                      <span class="disabled">« 上一页</span>
-                      <span class="current">1</span>
-                      <span class="disabled">下一页 »</span>
-                    </div>
+                  <div class="block" style="padding:10px;">
+                    <el-pagination @size-change="sizeChange" @current-change="currentChange" :current-page.sync="currentPage" :page-sizes="[5, 10, 15, 20]"
+                      :page-size="pageSize" layout="total,sizes, prev, pager, next,jumper" :total="totalcount">
+                    </el-pagination>
                   </div>
                   <!--/放置页码-->
                 </div>
@@ -224,18 +203,71 @@
       return {
         ginfo: {},
         num: 1, //计算器默认数量
+        isContent: true, //控制
+        comment: [],
+        currentPage: 1, //当前页数
+        pageSize: 10, //显示条数
+        totalcount: 0, //总条数
+        txtContent: '',
       };
     },
     created() {
       this.getginfo();
+      this.getComment();
     },
     //监听
     watch: {
       '$route': function () {
         this.getginfo();
+        this.getComment();
       }
     },
     methods: {
+      //评论提交
+      btnComment() {
+        var goodsid = this.$route.params.goodsid;
+        this.$http.post('/site/validate/comment/post/goods/' + goodsid, "commenttxt=" + this.txtContent)
+          .then(res => {
+            if (res.data.status == 1) {
+              this.$message.error(res.data.message);
+              return;
+            }
+            this.txtContent = '';
+            this.getComment();
+          });
+      },
+      /* 选择显示条数 */
+      sizeChange(sizeIndex) {
+        this.loading = true;
+        this.pageSize = sizeIndex;
+        this.currentPage = 1;
+        this.getComment();
+      },
+      /* 页数 */
+      currentChange(pageIndex) {
+        this.loading = true;
+        this.currentPage = pageIndex;
+        this.getComment();
+      },
+      //评论数据渲染
+      getComment() {
+        var goodsid = this.$route.params.goodsid;
+        console.log(goodsid)
+        var url = '/site/comment/getbypage/goods/' + goodsid + '?pageIndex=' + this.currentPage + '&pageSize=' + this.pageSize;
+        this.$http.get(url)
+          .then(res => {
+            if (res.data.status == 1) {
+              this.$message.error(res.data.message);
+              return;
+            }
+            this.comment = res.data.message;
+            this.totalcount = res.data.totalcount;
+          });
+      },
+      //控制商品详细介绍跟评论
+      toogleContent(toogle) {
+        this.isContent = toogle;
+      },
       //获取商品详情的数据
       getginfo() {
         var goodsid = this.$route.params.goodsid;
