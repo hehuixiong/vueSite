@@ -11,6 +11,8 @@ Vue.use(VueRouter);
 import ElementUi from 'element-ui';
 Vue.use(ElementUi)
 
+//导入css样式
+import '../statics/site/css/style.css';
 
 //导入layout模块
 import layout from './components/layout.vue';
