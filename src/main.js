@@ -29,7 +29,7 @@ var router = new VueRouter({
     path: '/site',
     component: layout,
     children: [{
-        name: 'goodslist', //购物管理-内容管理页面
+        name: 'goodslist', //购物商城页面
         path: 'goodslist',
         component: goodslist
       },

@@ -51,9 +51,7 @@
                 </a>
               </li>
               <li>
-                <a target="_blank" href="/admin/index.aspx">
-                  问题提交
-                </a>
+                <router-link to="/site/goodslist">购物商城</router-link>
               </li>
             </ul>
           </div>
@@ -69,6 +67,7 @@
         </div>
       </div>
     </div>
+    <router-view></router-view>
   </div>
 </template>
 <script>
