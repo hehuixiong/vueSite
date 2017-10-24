@@ -68,6 +68,7 @@
       </div>
     </div>
     <router-view></router-view>
+    <footer>底部</footer>
   </div>
 </template>
 <script>

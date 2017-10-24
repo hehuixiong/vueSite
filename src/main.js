@@ -17,6 +17,7 @@ import '../statics/site/css/style.css';
 //导入layout模块
 import layout from './components/layout.vue';
 import goodslist from './components/site/goodslist.vue';
+import goodsinfo from './components/site/goodsinfo.vue';
 
 //定义路由规则
 var router = new VueRouter({
@@ -32,6 +33,11 @@ var router = new VueRouter({
         name: 'goodslist', //购物商城页面
         path: 'goodslist',
         component: goodslist
+      },
+      {
+        name: 'goodsinfo', //商城详情页面
+        path: 'goodsinfo/:goodsid',
+        component: goodsinfo
       },
     ]
   }]

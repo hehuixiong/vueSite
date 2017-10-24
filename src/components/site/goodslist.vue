@@ -92,7 +92,7 @@
           <div class="wrap-box">
             <ul class="img-list">
               <li v-for="(datas,index) in glist.datas" :key="index">
-                <a href="javascript:;">
+                <router-link v-bind="{to:'/site/goodsinfo/'+datas.artID}">
                   <div class="img-box">
                     <img :src="datas.img_url">
                   </div>
@@ -107,7 +107,7 @@
                       </span>
                     </p>
                   </div>
-                </a>
+                </router-link>
               </li>
             </ul>
           </div>
@@ -122,7 +122,7 @@
     data() {
       return {
         ginfo: {},
-        glist:[],
+        glist: [],
       };
     },
     created() {
@@ -131,17 +131,17 @@
     },
     methods: {
       //获取glist的数据
-      getglist(){
+      getglist() {
         var url = '/site/goods/getgoodsgroup';
         this.$http.get(url)
-        .then(res=>{
-          if (res.data.status == 1) {
+          .then(res => {
+            if (res.data.status == 1) {
               this.$message.error(res.data.message);
               return;
             }
             this.glist = res.data.message;
             console.log(this.glist)
-        });
+          });
       },
       //获取左侧菜单栏，轮播图，置顶商品数据
       getginfo() {
