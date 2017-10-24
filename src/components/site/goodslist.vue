@@ -45,10 +45,10 @@
           <div class="left-705">
             <div class="banner-img">
               <div id="focus-box" class="focus-box">
-                <el-carousel indicator-position="outside">
+                <el-carousel :interval="2000" arrow="hover">
                   <el-carousel-item v-for="(sliderlist,index) in ginfo.sliderlist" :key="index">
                     <img :src="sliderlist.img_url" alt="">
-                    <h3>{{ item }}</h3>
+                    <!-- <h3>{{ sliderlist.title }}</h3> -->
                   </el-carousel-item>
                 </el-carousel>
               </div>
@@ -75,7 +75,46 @@
           <!--/推荐商品-->
         </div>
       </div>
+      <!-- 手机数码 -->
+      <div v-for="(glist,index) in glist" :key="index">
+        <!--子类-->
+        <div class="main-tit">
+          <h2 v-text="glist.catetitle"></h2>
+          <p>
+            <a href="/goods/43.html" v-for="(level2catelist,index) in glist.level2catelist" :key="index">{{ level2catelist.subcatetitle }}</a>
+            <a href="/goods/40.html">更多
+              <i>+</i>
+            </a>
+          </p>
+        </div>
+        <!--/子类-->
+        <div class="wrapper clearfix">
+          <div class="wrap-box">
+            <ul class="img-list">
+              <li v-for="(datas,index) in glist.datas" :key="index">
+                <a href="javascript:;">
+                  <div class="img-box">
+                    <img :src="datas.img_url">
+                  </div>
+                  <div class="info">
+                    <h3 v-text="datas.artTitle"></h3>
+                    <p class="price">
+                      <b>¥{{ datas.sell_price }}</b>元</p>
+                    <p>
+                      <strong>库存 {{ datas.stock_quantity }}</strong>
+                      <span>市场价：
+                        <s>{{ datas.market_price }}</s>
+                      </span>
+                    </p>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
+
   </div>
 </template>
 <script>
@@ -83,12 +122,28 @@
     data() {
       return {
         ginfo: {},
+        glist:[],
       };
     },
     created() {
       this.getginfo();
+      this.getglist();
     },
     methods: {
+      //获取glist的数据
+      getglist(){
+        var url = '/site/goods/getgoodsgroup';
+        this.$http.get(url)
+        .then(res=>{
+          if (res.data.status == 1) {
+              this.$message.error(res.data.message);
+              return;
+            }
+            this.glist = res.data.message;
+            console.log(this.glist)
+        });
+      },
+      //获取左侧菜单栏，轮播图，置顶商品数据
       getginfo() {
         var url = '/site/goods/gettopdata/goods';
         this.$http.get(url)
