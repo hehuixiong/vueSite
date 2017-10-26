@@ -10,7 +10,7 @@
       </div>
     </div>
     <!-- 商品详情 -->
-    <div class="section">
+    <div class="section" v-if="ginfo.goodsinfo">
       <div class="wrapper clearfix">
         <div class="wrap-box">
           <!--页面左边-->
@@ -76,8 +76,9 @@
                     <dt>购买数量</dt>
                     <dd>
                       <div class="stock-box">
-                        <el-input-number v-model="num" :min="1" debounce></el-input-number>
+                        <el-input-number v-model="buyCount" :min="1"></el-input-number>
                       </div>
+                      <div style="color:red" v-if="buyCount>ginfo.goodsinfo.stock_quantity"><Icon type="ios-minus-outline"></Icon> 您所填写的商品数量超过库存！</div>
                       <span class="stock-txt">
                         库存
                         <em id="commodityStockNum" v-text="ginfo.goodsinfo.stock_quantity"></em>件
@@ -86,9 +87,9 @@
                   </dl>
                   <dl>
                     <dd>
-                      <div class="btn-buy" id="buyButton">
-                        <button class="buy" onclick="cartAdd(this,'/',1,'/shopping.html');">立即购买</button>
-                        <button class="add" onclick="cartAdd(this,'/',0,'/cart.html');">加入购物车</button>
+                      <div class="btn-buy" id="buyButton" >
+                        <el-button type="warning" :disabled="buyCount>ginfo.goodsinfo.stock_quantity">立即购买</el-button>
+                        <el-button type="danger" @click="cartAdd" :disabled="buyCount>ginfo.goodsinfo.stock_quantity">加入购物车</el-button>
                       </div>
                     </dd>
                   </dl>
@@ -97,20 +98,24 @@
               </div>
               <!--/商品信息-->
             </div>
-
             <div id="goodsTabs" class="goods-tab bg-wrap">
               <!--选项卡-->
-              <div id="tabHead" class="tab-head" style="position: static; top: 517px; width: 925px;">
-                <ul>
-                  <li @click="toogleContent(true)">
-                    <a v-bind="{class:isContent?'selected':''}" href="javascript:;">商品介绍</a>
-                  </li>
-                  <!-- selected -->
-                  <li @click="toogleContent(false)">
-                    <a v-bind="{class:!isContent?'selected':''}" href="javascript:;" class="">商品评论</a>
-                  </li>
-                </ul>
-              </div>
+              <Affix>
+                <div id="tabHead" class="tab-head" style="position: static; top: 517px; width: 925px;">
+                  <ul>
+                    <li @click="toogleContent(true)">
+                      <a v-bind="{class:isContent?'selected':''}" href="javascript:;">商品介绍</a>
+                    </li>
+                    <!-- selected -->
+                    <li @click="toogleContent(false)">
+                      <a v-bind="{class:!isContent?'selected':''}" href="javascript:;" class="">商品评论</a>
+                    </li>
+                    <li>
+                      <a href="javascript:;" class="">服务详情</a>
+                    </li>
+                  </ul>
+                </div>
+              </Affix>
               <!--/选项卡-->
 
               <!--选项内容-->
@@ -198,7 +203,12 @@
 </template>
 <script>
   import '../../../statics/site/js/jqplugins/imgzoom/magnifier.js';
+  import Affix from 'iview/src/components/affix';
+  import {setItem} from '../../kits/localStorageKit.js';
   export default {
+    components: {
+      Affix,
+    },
     data() {
       return {
         ginfo: {},
@@ -209,20 +219,27 @@
         pageSize: 10, //显示条数
         totalcount: 0, //总条数
         txtContent: '',
+        buyCount:1,
       };
     },
     created() {
-      this.getginfo();
-      this.getComment();
+      this.getginfo();//调用商品详情的数据
+      this.getComment();//调用评论的数据
     },
     //监听
     watch: {
       '$route': function () {
         this.getginfo();
         this.getComment();
+        this.buyCount = 1;
       }
     },
     methods: {
+      //点击加入购物车
+      cartAdd(){
+        this.$store.dispatch("chageBuyCount",this.buyCount);
+        setItem({gid:this.$route.params.goodsid,bcount:this.buyCount});
+      },
       //评论提交
       btnComment() {
         var goodsid = this.$route.params.goodsid;
@@ -232,7 +249,9 @@
               this.$message.error(res.data.message);
               return;
             }
+            //提交之后重置为空
             this.txtContent = '';
+            //重新获取
             this.getComment();
           });
       },
@@ -252,7 +271,6 @@
       //评论数据渲染
       getComment() {
         var goodsid = this.$route.params.goodsid;
-        console.log(goodsid)
         var url = '/site/comment/getbypage/goods/' + goodsid + '?pageIndex=' + this.currentPage + '&pageSize=' + this.pageSize;
         this.$http.get(url)
           .then(res => {

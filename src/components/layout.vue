@@ -12,8 +12,10 @@
             <a href="/login.html">登录</a>
             <a href="/register.html">注册</a>
             <strong>|</strong>
-            <!--<a href="/content/contact.html"><i class="iconfont icon-phone"></i>联系我们</a>
-            <a href="/cart.html"><i class="iconfont icon-cart"></i>购物车(<span id="shoppingCartCount"><script type="text/javascript" src="/tools/submit_ajax.ashx?action=view_cart_count"></script></span>)</a>-->
+            <!-- <a href="/content/contact.html"><i class="iconfont icon-phone"></i>联系我们</a> -->
+            <router-link to="/site/car" v-bind="{style:this.$store.getters.getCount>0?'background:#fabd00;color:#fff':''}">
+              <i class="iconfont icon-cart"></i>购物车<span id="shoppingCartCount">({{ this.$store.getters.getCount }})</span>
+            </router-link>
           </div>
         </div>
       </div>
@@ -25,30 +27,19 @@
           <div id="menu2" class="nav-box menuhd">
             <ul>
               <li class="index">
-                <a href="/index.html">
-                  首页
-                </a>
+                <router-link to="/site/goodslist0">首页</router-link>
               </li>
               <li class="news">
-                <a href="/news.html">
-                  学员问题汇总
-                </a>
+                <router-link to="/site/goodslist1">学员问题汇总</router-link>
               </li>
               <li class="photo">
-                <a href="/photo.html">
-                  重难点专区
-                </a>
+                <router-link to="/site/goodslist2">重点难专区</router-link>
               </li>
-              <!--<li class="goods"><a href="">就业阶段</a></li>-->
               <li class="video">
-                <a href="/video.html">
-                  前端常用功能
-                </a>
+                <router-link to="/site/goodslist3">前端常用功能</router-link>
               </li>
               <li class="down">
-                <a href="/down.html">
-                  资源下载
-                </a>
+                <router-link to="/site/goodslist4">资源下载</router-link>
               </li>
               <li>
                 <router-link to="/site/goodslist">购物商城</router-link>
@@ -96,11 +87,17 @@
     });
 
   });
+  // import {getItem} from '../kits/localStorageKit.js';
   export default {
     data() {
-      return {};
+      return {
+      };
     },
-    methods: {}
+    mounted() {
+    },
+    methods: {
+      
+    }
   };
 
 </script>
@@ -109,5 +106,10 @@
   /* 导入样式的格式  @import url() */
 
   @import url('../../statics/elementuiCss/index.css');
-
+  .right-box a,.right-box strong{
+    float: left;
+  }
+  .right-box a:last-child{
+    padding: 0 10px;
+  }
 </style>

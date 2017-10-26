@@ -59,14 +59,16 @@
           <!--推荐商品-->
           <div class="left-220">
             <ul class="side-img-list">
-
               <li v-for="(toplist,index) in ginfo.toplist" :key="index">
-                <div class="img-box">
-                  <label>1</label>
-                  <img :src="toplist.img_url">
-                </div>
+                <router-link v-bind="{to:'/site/goodsinfo/'+toplist.id}">
+                  <div class="img-box">
+                    <label>{{ index + 1 }}</label>
+                    <img :src="toplist.img_url">
+                  </div>
+                </router-link>
                 <div class="txt-box">
-                  <a href="javascript:;" v-text="toplist.title"></a>
+                  <router-link v-bind="{to:'/site/goodsinfo/'+toplist.id}" v-text="toplist.title">
+                  </router-link>
                   <span>{{ toplist.add_time | addTime("YYYY-MM-DD") }}</span>
                 </div>
               </li>
@@ -140,7 +142,6 @@
               return;
             }
             this.glist = res.data.message;
-            console.log(this.glist)
           });
       },
       //获取左侧菜单栏，轮播图，置顶商品数据
@@ -153,7 +154,6 @@
               return;
             }
             this.ginfo = res.data.message;
-            console.log(this.ginfo)
           });
       },
     }
