@@ -40,12 +40,11 @@
           <!--购物车头部-->
           <!--商品列表-->
           <div class="cart-box">
-            <table width="100%" align="center" class="cart-table" border="0" cellspacing="0" cellpadding="8">
+            <!-- <table width="100%" align="center" class="cart-table" border="0" cellspacing="0" cellpadding="8">
               <tbody>
                 <tr>
                   <th width="48" align="center">
                     <el-checkbox v-model="ischecked" @change="isAll">全选</el-checkbox>
-                    <!-- <a v-model="ischecked" @click="isAll">全选</a> -->
                   </th>
                   <th align="left" colspan="2">商品信息</th>
                   <th width="84" align="left">单价</th>
@@ -99,18 +98,59 @@
                   </th>
                 </tr>
               </tbody>
-            </table>
+            </table> -->
+            {{ values }}
+            <el-table :data="goodscar" stripe style="width: 100%" @select-all="isAll" @select="itemChange">
+              <!-- 全选 -->
+              <el-table-column prop="date" width="45" type="selection">
+                <template slot-scope="scope">
+                    <el-checkbox v-model="values[index]" @change="itemchange(ischecked)"></el-checkbox>
+                </template>
+              </el-table-column>
+              <!-- 商品信息 -->
+              <el-table-column prop="name" label="商品信息">
+                <template slot-scope="scope">
+                  <router-link to="#">
+                    <img :src="scope.row.img_url" width="40" style="float:left">
+                    <span style="float:left;line-height:40px;padding-left:8px;">{{ scope.row.title }}</span>
+                  </router-link>
+                </template>
+              </el-table-column>
+              <!-- 单价 -->
+              <el-table-column prop="sell_price" label="单价" width="84">
+              </el-table-column>
+              <!-- 数量 -->
+              <el-table-column prop="address" label="数量" width="140">
+                <template slot-scope="scope">
+                  <myinput @update='update' :options='{gid:scope.row.id,count:scope.row.buycount}'></myinput>
+                </template>
+              </el-table-column>
+              <!-- 小计 -->
+              <el-table-column label="小计" width="104">
+                <template slot-scope="scope">
+                  <span style="color:#34ad2a;">{{ scope.row.sell_price * scope.row.buycount }}.00</span>
+                </template>
+              </el-table-column>
+              <!-- 操作 -->
+              <el-table-column prop="address" label="操作" width="80">
+                <template slot-scope="scope">
+                  <el-button size="mini" @click="deldata(scope.row.id)">删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div style="text-align:right;color:#34ad2a;">
+              已选择商品
+              <b class="red" id="totalQuantity">{{ selectCount }}</b> 件 &nbsp;&nbsp;&nbsp; 商品总金额（不含运费）：
+              <span class="red">￥</span>
+              <b class="red" id="totalAmount" style="font-size:20px">{{selletmentAmount}}</b>元
+            </div>
           </div>
           <!--/商品列表-->
           <!--购物车底部-->
           <div class="cart-foot clearfix">
             <div class="right-box">
-              <router-link to="">
-                  <button class="button">继续购物</button>
-              </router-link>
-              <router-link to="/site/shopping">
-                <button class="submit">立即结算</button>
-              </router-link>
+              <button class="button">继续购物</button>
+              <button class="submit">立即结算</button>
             </div>
           </div>
           <!--购物车底部-->
@@ -128,20 +168,20 @@
   } from '../../kits/localStorageKit.js';
   import myinput from '../subcom/myinputNumber.vue';
   export default {
-    components:{
+    components: {
       myinput
     },
     data() {
       return {
-        goodscar: [],//用来存储接口返回的数据
+        goodscar: [], //用来存储接口返回的数据
         ischecked: false,
         values: [], //用来初始化默认未选择数据，
-        selectCount:0,//用来显示商品的件数
-        istrue:false,
+        selectCount: 0, //用来显示商品的件数
+        istrue: false,
       };
     },
     created() {
-      this.getcar();//调用接口返回的数据
+      this.getcar(); //调用接口返回的数据
     },
     //计算属性
     computed: {
@@ -150,23 +190,42 @@
         var trueArr = this.values.filter(function (item) {
           return item;
         });
-        this.selectCount = trueArr.length;//返回true的长度，代表选择的件数
-        var selleAmount = 0;//用来存储总额
-        this.values.forEach((item,index)=>{
-        // remoteItem(this.goodscar[index].id);//把之前的数据先清除
-        //重新设置新的数据
-          if(item){
-            var goodsinfo = this.goodscar[index];//获取数据
+        this.selectCount = trueArr.length; //返回true的长度，代表选择的件数
+        var selleAmount = 0; //用来存储总额
+        this.values.forEach((item, index) => {
+          // remoteItem(this.goodscar[index].id);//把之前的数据先清除
+          //重新设置新的数据
+          if (item) {
+            var goodsinfo = this.goodscar[index]; //获取数据
             selleAmount += (goodsinfo.sell_price * goodsinfo.buycount) //把接口的数据中的数量*单价
           }
         });
-        return selleAmount;//最后把总额返回
+        return selleAmount; //最后把总额返回
       },
     },
     methods: {
-      update(obj){
-        this.goodscar.forEach(item=>{
-          if(item.id == obj.gid){
+      //点击全选功能
+      isAll(val) {
+        console.log(this.values)
+        // this.ischecked = !this.ischecked;
+        // if (ischecked) {
+        //   for (var i = 0; i < this.values.length; i++) {
+        //     this.values[i] = true;
+        //   }
+        // }else{
+        //   for (var i = 0; i < this.values.length; i++) {
+        //     this.values[i] = false;
+        //   }
+        // }
+        // for (var i = 0; i < this.values.length; i++) {
+        //   this.values[i] = !this.ischecked;
+        // }
+        // this.values.push(false);
+        // this.values.pop();
+      },
+      update(obj) {
+        this.goodscar.forEach(item => {
+          if (item.id == obj.gid) {
             item.buycount = obj.count;
           }
           this.goodscar.push('');
@@ -191,19 +250,13 @@
         // this.$store.dispatch("chageBuyCount");
       },
       //点击单个选中与未选中的时候触发
-      itemchange(val) {
-        if(val){
-          this.ischecked = false;
-        }
+      itemChange(val) {
+        // for(var i=0; i<this.values.length; i++){
+        //   this.values[i] = true;
+        // }
+        // console.log(this.values)
       },
-      //点击全选功能
-      isAll() {
-        for (var i = 0; i < this.values.length; i++) {
-          this.values[i] = this.ischecked;
-        }
-        this.values.push(false);
-        this.values.pop();
-      },
+
       //获取购物车的数据
       getcar() {
         var goodsObj = getItem();
@@ -215,7 +268,7 @@
         var url = '/site/comment/getshopcargoods/';
         this.$http.get(url + ids).then(res => {
           this.goodscar = res.data.message;
-          
+
           //获取localStorage中的购物车对象
           var goodsObj = getItem();
           this.goodscar.forEach((item, index) => {
@@ -228,6 +281,7 @@
       },
     }
   };
+
 </script>
 <style scoped>
 

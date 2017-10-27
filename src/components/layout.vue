@@ -13,7 +13,7 @@
             <a href="/register.html">注册</a>
             <strong>|</strong>
             <!-- <a href="/content/contact.html"><i class="iconfont icon-phone"></i>联系我们</a> -->
-            <router-link to="/site/car" v-bind="{style:this.$store.getters.getCount>0?'background:#fabd00;color:#fff':''}">
+            <router-link to="/site/car" v-bind="{style:this.$store.getters.getCount>0?'background:#ff4949;color:#fff':''}">
               <i class="iconfont icon-cart"></i>购物车<span id="shoppingCartCount">({{ this.$store.getters.getCount }})</span>
             </router-link>
           </div>
@@ -59,7 +59,6 @@
       </div>
     </div>
     <router-view></router-view>
-    <footer>底部</footer>
   </div>
 </template>
 <script>

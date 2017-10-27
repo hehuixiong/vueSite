@@ -7,6 +7,7 @@
 </template>
 
 <script>
+  import {setItem,remoteItem} from '../../kits/localStorageKit.js';
   export default {
     data() {
       return {
@@ -27,7 +28,10 @@
         this.send();
       },
       send(){
-        this.$emit('update',{gid:this.options.gid,count:this.count})
+        this.$store.dispatch("chageBuyCount",this.count);
+        this.$emit('update',{gid:this.options.gid,count:this.count});
+        remoteItem(this.options.gid);
+        setItem({gid:this.options.gid,bcount:this.count});
       },
     }
   }

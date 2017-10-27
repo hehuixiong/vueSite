@@ -33,6 +33,8 @@ import layout from './components/layout.vue';
 import goodslist from './components/site/goodslist.vue';
 import goodsinfo from './components/site/goodsinfo.vue';
 import car from './components/site/car.vue';
+import login from './components/site/login.vue';
+import shopping from './components/site/shopping.vue';
 
 //定义路由规则
 var router = new VueRouter({
@@ -44,6 +46,8 @@ var router = new VueRouter({
     name: 'layout', //主页面
     path: '/site',
     component: layout,
+    
+    
     children: [{
         name: 'goodslist', //购物商城页面
         path: 'goodslist',
@@ -55,13 +59,54 @@ var router = new VueRouter({
         component: goodsinfo
       },
       {
-        name: 'car', //商城详情页面
+        name: 'car', //购物车页面
         path: 'car',
         component: car
+      },
+      {
+        name: 'login', //登录页面
+        path: 'login',
+        component: login
+      },
+      {
+        name: 'shopping', //结算页面
+        path: 'shopping',
+        component: shopping,
+        meta: {
+          islogin: true
+        },
       },
     ]
   }]
 })
+
+//全局守卫---router
+router.beforeEach((to, from, next) => {
+  //判断，如果不是登录页面就进行保存name，是登录页面就不需要保存
+  if (to.name !== 'login') {
+    localStorage.setItem('currerRouteName', to.name);//保存name到localStorage中
+  }
+  //判断，如果路由规则中，带有islogin==true的话，就进行登录验证，否则不需要验证
+  if (to.meta.islogin) {
+    //通过请求后台接口，返回的数据如果是logined则代表已经登录过，否则就是没有登录过，直接跳转到登录页面即可
+    axios.get('/site/account/islogin').then(res => {
+      if (res.data.code == 'logined') {
+        next();
+      }else{
+        //没有登录过，直接跳转到登录页面
+        router.push({
+          name: 'login'
+        });
+      }
+      
+    });
+  } else {
+    //不需要进行验证-直接跳转
+    next();
+  }
+});
+
+
 //共有过滤器
 Vue.filter("addTime", function (input, gs) {
   var date = new Date(input);
@@ -79,17 +124,13 @@ Vue.filter("addTime", function (input, gs) {
 })
 
 
-
-
-
+//设置vuex的一系列方法------------
 var state = {
   buyCount: 0
 }
 
 var actions = {
-  chageBuyCount({
-    commit
-  }, parmsBuyCount) {
+  chageBuyCount({commit}, parmsBuyCount) {
     commit("chageBuyCount", parmsBuyCount);
   }
 }
@@ -100,21 +141,17 @@ var mutations = {
   }
 }
 
-import {
-  getItem
-} from './kits/localStorageKit.js';
+import {getItem} from './kits/localStorageKit.js';
 var getters = {
   getCount(state) {
     if (state.buyCount < 0) {
       return state.buyCount
     }
     var goodsObj = getItem();
-    console.log(goodsObj)
     var sunBuyCount = 0;
     for (var key in goodsObj) {
       sunBuyCount += goodsObj[key]
     }
-    console.log(sunBuyCount)
     return sunBuyCount;
   }
 }

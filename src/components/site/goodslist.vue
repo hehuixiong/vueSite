@@ -45,7 +45,7 @@
           <div class="left-705">
             <div class="banner-img">
               <div id="focus-box" class="focus-box">
-                <el-carousel :interval="2000" arrow="hover">
+                <el-carousel :interval="3000" arrow="hover">
                   <el-carousel-item v-for="(sliderlist,index) in ginfo.sliderlist" :key="index">
                     <img :src="sliderlist.img_url" alt="">
                     <!-- <h3>{{ sliderlist.title }}</h3> -->
