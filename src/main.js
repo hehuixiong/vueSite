@@ -35,6 +35,7 @@ import goodsinfo from './components/site/goodsinfo.vue';
 import car from './components/site/car.vue';
 import login from './components/site/login.vue';
 import shopping from './components/site/shopping.vue';
+import pay from './components/site/pay.vue';
 
 //定义路由规则
 var router = new VueRouter({
@@ -76,6 +77,14 @@ var router = new VueRouter({
           islogin: true
         },
       },
+      {
+        name: 'pay', //支付页面
+        path: 'pay/:orderid',
+        component: pay,
+        meta: {
+          islogin: true
+        },
+      },
     ]
   }]
 })
@@ -98,7 +107,6 @@ router.beforeEach((to, from, next) => {
           name: 'login'
         });
       }
-      
     });
   } else {
     //不需要进行验证-直接跳转

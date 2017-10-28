@@ -27,3 +27,10 @@ export function remoteItem(gid){
   delete goodsObj[gid];
   localStorage.setItem(key,JSON.stringify(goodsObj))
 }
+
+
+export function updageItem(obj){
+  var goodsObj = getItem();
+  goodsObj[obj.gid] = obj.count;
+  localStorage.setItem(key,JSON.stringify(goodsObj))
+}

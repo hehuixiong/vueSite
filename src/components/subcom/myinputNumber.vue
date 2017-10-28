@@ -28,10 +28,7 @@
         this.send();
       },
       send(){
-        this.$store.dispatch("chageBuyCount",this.count);
         this.$emit('update',{gid:this.options.gid,count:this.count});
-        remoteItem(this.options.gid);
-        setItem({gid:this.options.gid,bcount:this.count});
       },
     }
   }

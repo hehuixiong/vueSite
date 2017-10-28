@@ -70,7 +70,7 @@
 
                 <tr v-for="(item,index) in goodscar" :key="item.id">
                   <td width="48" align="center">
-                    <el-checkbox v-model="values[index]" @change="itemchange(ischecked)"></el-checkbox>
+                    <el-checkbox v-model="values[index]" @change="itemchange(values[index])"></el-checkbox>
                   </td>
                   <td align="left" colspan="2">
                     <router-link to="">
@@ -106,11 +106,9 @@
           <div class="cart-foot clearfix">
             <div class="right-box">
               <router-link to="">
-                  <button class="button">继续购物</button>
+                <button class="button">继续购物</button>
               </router-link>
-              <router-link to="/site/shopping">
-                <button class="submit">立即结算</button>
-              </router-link>
+              <button class="submit" @click="toShopping">立即结算</button>
             </div>
           </div>
           <!--购物车底部-->
@@ -124,24 +122,25 @@
   import {
     setItem,
     getItem,
-    remoteItem
+    remoteItem,
+    updageItem
   } from '../../kits/localStorageKit.js';
   import myinput from '../subcom/myinputNumber.vue';
   export default {
-    components:{
+    components: {
       myinput
     },
     data() {
       return {
-        goodscar: [],//用来存储接口返回的数据
+        goodscar: [], //用来存储接口返回的数据
         ischecked: false,
         values: [], //用来初始化默认未选择数据，
-        selectCount:0,//用来显示商品的件数
-        istrue:false,
+        selectCount: 0, //用来显示商品的件数
+        istrue: false,
       };
     },
     created() {
-      this.getcar();//调用接口返回的数据
+      this.getcar(); //调用接口返回的数据
     },
     //计算属性
     computed: {
@@ -150,51 +149,92 @@
         var trueArr = this.values.filter(function (item) {
           return item;
         });
-        this.selectCount = trueArr.length;//返回true的长度，代表选择的件数
-        var selleAmount = 0;//用来存储总额
-        this.values.forEach((item,index)=>{
-        // remoteItem(this.goodscar[index].id);//把之前的数据先清除
-        //重新设置新的数据
-          if(item){
-            var goodsinfo = this.goodscar[index];//获取数据
+        this.selectCount = trueArr.length; //返回true的长度，代表选择的件数
+        var selleAmount = 0; //用来存储总额
+        this.values.forEach((item, index) => {
+          // remoteItem(this.goodscar[index].id);//把之前的数据先清除
+          //重新设置新的数据
+          if (item) {
+            var goodsinfo = this.goodscar[index]; //获取数据
             selleAmount += (goodsinfo.sell_price * goodsinfo.buycount) //把接口的数据中的数量*单价
           }
         });
-        return selleAmount;//最后把总额返回
+        return selleAmount; //最后把总额返回
       },
     },
     methods: {
-      update(obj){
-        this.goodscar.forEach(item=>{
-          if(item.id == obj.gid){
+      //点击立即结算要处理的逻辑代码
+
+      toShopping() {
+        var buycountObj = {};//格式{"88":1}
+        this.values.forEach((item, index) => {
+          if (item) {
+            buycountObj[this.goodscar[index].id] = this.goodscar[index].buycount;
+            localStorage.setItem("newBuyCount",JSON.stringify(buycountObj));
+            this.$router.push({name:'shopping'});
+            return;
+          }else{
+            this.$message.error("请选择你要购买的商品");
+          }
+          
+        })
+        //步骤1：点击的时候需要带下商品的id
+        // var ids = '';
+        // var idArr = [];
+        // //
+        // this.values.forEach((item, index) => {
+        //   if (item) {
+        //     idArr.push(this.goodscar[index].id);
+        //     ids = idArr.join(',');
+        //     this.$router.push({
+        //       name: 'shopping',
+        //       params: {
+        //         ids: ids
+        //       }
+        //     });
+        //     return;
+        //   }
+        //   this.$message.success('请选择商品再下单');
+        // });
+      },
+      update(obj) {
+        this.goodscar.forEach(item => {
+          if (item.id == obj.gid) {
             item.buycount = obj.count;
           }
-          this.goodscar.push('');
+          this.$store.dispatch("chageBuyCount", obj.count); //更新购物车的数值
+          remoteItem(obj.gid); //先把其清除
+          setItem({
+            gid: obj.gid,
+            bcount: obj.count
+          }); //再把其设置
+          this.goodscar.push(''); //让数组的长度动一动
           this.goodscar.pop();
         });
       },
       // 删除商品数据
       deldata(goodsid) {
+        this.$store.dispatch("chageBuyCount");
         // 1.0 删除this.list中这个商品数据
         var index = -1;
         index = this.goodscar.findIndex(function (item) {
           return item.id == goodsid
         });
-
         this.goodscar.splice(index, 1);
-
         // 2.0 删除 this.values中的这个商品对应的索引下面的数据
         this.values.splice(index, 1);
-
         // 3.0 删除localStorage中的这个商品数据
         remoteItem(goodsid);
-        // this.$store.dispatch("chageBuyCount");
       },
       //点击单个选中与未选中的时候触发
       itemchange(val) {
-        if(val){
-          this.ischecked = false;
-        }
+        // if (!val) {
+        //   this.values.forEach(item => {
+        //     if (!item) {
+        //       this.ischecked = false;
+        //     }
+        //   })
+        // }
       },
       //点击全选功能
       isAll() {
@@ -215,7 +255,7 @@
         var url = '/site/comment/getshopcargoods/';
         this.$http.get(url + ids).then(res => {
           this.goodscar = res.data.message;
-          
+
           //获取localStorage中的购物车对象
           var goodsObj = getItem();
           this.goodscar.forEach((item, index) => {
@@ -228,6 +268,7 @@
       },
     }
   };
+
 </script>
 <style scoped>
 
